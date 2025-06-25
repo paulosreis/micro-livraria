@@ -9,16 +9,17 @@ O objetivo da aula é permitir que o aluno tenha um primeiro contato com micross
 Como nosso objetivo é didático, na livraria virtual estão à venda apenas três livros, conforme pode ser visto na próxima figura, que mostra a interface Web do sistema. Além disso, a operação de compra apenas simula a ação do usuário, não efetuando mudanças no estoque. Assim, os clientes da livraria podem realizar apenas duas operações: (1) listar os produtos à venda; (2) calcular o frete de envio.
 
 <p align="center">
-    <img width="70%" src="https://user-images.githubusercontent.com/7620947/108773349-f68f3500-753c-11eb-8c4f-434ca9a9deec.png" />
+    <img width="70%" src=".github/images/frontend.png" />
 </p>
 
 No restante deste documento vamos:
 
 -   Descrever o sistema, com foco na sua arquitetura.
 -   Apresentar instruções para sua execução local, usando o código disponibilizado no repositório.
--   Descrever duas tarefas práticas para serem realizadas pelos alunos, as quais envolvem:
+-   Descrever três tarefas práticas para serem realizadas pelos alunos, as quais envolvem:
     -   Tarefa Prática #1: Implementação de uma nova operação em um dos microsserviços
-    -   Tarefa Prática #2: Criação de containers Docker para facilitar a execução dos microsserviços.
+    -   Tarefa Prática #2: Implementação de um novo serviço de avaliações (reviews)
+    -   Tarefa Prática #3: Criação de containers Docker para facilitar a execução dos microsserviços
 
 ## Arquitetura
 
@@ -42,7 +43,7 @@ Como ilustrado no diagrama a seguir, a comunicação entre o front-end e o backe
 Já a comunicação entre o Controller e os microsserviços do back-end é baseada em [gRPC](https://grpc.io/).
 
 <p align="center">
-    <img width="70%" src="https://user-images.githubusercontent.com/7620947/108454750-bc2b4c80-724b-11eb-82e5-717b8b5c5a88.png" />
+    <img width="70%" src=".github/images/architecture.png" />
 </p>
 
 Optamos por usar gRPC no backend porque ele possui um desempenho melhor do que REST. Especificamente, gRPC é baseado no conceito de **Chamada Remota de Procedimentos (RPC)**. A ideia é simples: em aplicações distribuídas que usam gRPC, um cliente pode chamar funções implementadas em outros processos de forma transparente, isto é, como se tais funções fossem locais. Em outras palavras, chamadas gRPC tem a mesma sintaxe de chamadas normais de função.
@@ -61,15 +62,15 @@ Especificamente, no caso de gRPC, a implementação desses dois conceitos ganhou
 Quando trabalhamos com gRPC, cada microserviço possui um arquivo `.proto` que define a assinatura das operações que ele disponibiliza para os outros microsserviços.
 Neste mesmo arquivo, declaramos também os tipos dos parâmetros de entrada e saída dessas operações.
 
-O exemplo a seguir mostra o arquivo [.proto](https://github.com/aserg-ufmg/micro-livraria/blob/main/proto/shipping.proto) do nosso microsserviço de frete. Nele, definimos que esse microsserviço disponibiliza uma função `GetShippingRate`. Para chamar essa função devemos passar como parâmetro de entrada um objeto contendo o CEP (`ShippingPayLoad`). Após sua execução, a função retorna como resultado um outro objeto (`ShippingResponse`) com o valor do frete.
+O exemplo a seguir mostra o arquivo [.proto](https://github.com/hsborges/micro-livraria/blob/main/proto/shipping.proto) do nosso microsserviço de frete. Nele, definimos que esse microsserviço disponibiliza uma função `GetShippingRate`. Para chamar essa função devemos passar como parâmetro de entrada um objeto contendo o CEP (`ShippingPayLoad`). Após sua execução, a função retorna como resultado um outro objeto (`ShippingResponse`) com o valor do frete.
 
 <p align="center">
-    <img width="70%" src="https://user-images.githubusercontent.com/7620947/108770189-c776c480-7538-11eb-850a-f8a23f562fa5.png" />
+    <img width="70%" src=".github/images/proto-example.png" />
 </p>
 
-Em gRPC, as mensagens (exemplo: `Shippingload`) são formadas por um conjunto de campos, tal como em um `struct` da linguagem C, por exemplo. Todo campo possui um nome (exemplo: `cep`) e um tipo (exemplo: `string`). Além disso, todo campo tem um número inteiro que funciona como um identificador único para o mesmo na mensagem (exemplo: ` = 1`). Esse número é usado pela implementação de gRPC para identificar o campo no formato binário de dados usado por gRPC para comunicação distribuída.
+Em gRPC, as mensagens (exemplo: `Shippingload`) são formadas por um conjunto de campos, tal como em um `struct` da linguagem C, por exemplo. Todo campo possui um nome (exemplo: `cep`) e um tipo (exemplo: `string`). Além disso, todo campo tem um número inteiro que funciona como um identificador único para o mesmo na mensagem (exemplo: `= 1`). Esse número é usado pela implementação de gRPC para identificar o campo no formato binário de dados usado por gRPC para comunicação distribuída.
 
-Arquivos .proto são usados para gerar **stubs**, que nada mais são do que proxies que encapsulam os detalhes de comunicação em rede, incluindo troca de mensagens, protocolos, etc. Mais detalhes sobre o padrão de projeto Proxy podem ser obtidos no [Capítulo 6](https://engsoftmoderna.info/cap6.html). 
+Arquivos .proto são usados para gerar **stubs**, que nada mais são do que proxies que encapsulam os detalhes de comunicação em rede, incluindo troca de mensagens, protocolos, etc. Mais detalhes sobre o padrão de projeto Proxy podem ser obtidos no [Capítulo 6](https://engsoftmoderna.info/cap6.html).
 
 Em linguagens estáticas, normalmente precisa-se chamar um compilador para gerar o código de tais stubs. No caso de JavaScript, no entanto, esse passo não é necessário, pois os stubs são gerados de forma transparente, em tempo de execução.
 
@@ -102,7 +103,7 @@ npm install
 npm run start
 ```
 
-6.  Para fins de teste, efetue uma requisição para o microsserviço responsável pela API do backend.
+6. Para fins de teste, efetue uma requisição para o microsserviço responsável pela API do backend.
 
 -   Se tiver o `curl` instalado na sua máquina, basta usar:
 
@@ -112,13 +113,13 @@ curl -i -X GET http://localhost:3000/products
 
 -   Caso contrário, você pode fazer uma requisição acessando, no seu navegador, a seguinte URL: `http://localhost:3000/products`.
 
-7. Teste agora o sistema como um todo, abrindo o front-end em um navegador: http://localhost:5000. Faça então um teste das principais funcionalidades da livraria.
+7. Teste agora o sistema como um todo, abrindo o front-end em um navegador: <http://localhost:5000>. Faça então um teste das principais funcionalidades da livraria.
 
 ## Tarefa Prática #1: Implementando uma Nova Operação
 
 Nesta primeira tarefa, você irá implementar uma nova operação no serviço `Inventory`. Essa operação, chamada `SearchProductByID` vai pesquisar por um produto, dado o seu ID.
 
-Como descrito anteriormente, as assinaturas das operações de cada microsserviço são definidas em um arquivo `.proto`, no caso [proto/inventory.proto](https://github.com/aserg-ufmg/micro-livraria/blob/main/proto/inventory.proto).
+Como descrito anteriormente, as assinaturas das operações de cada microsserviço são definidas em um arquivo `.proto`, no caso [proto/inventory.proto](https://github.com/hsborges/micro-livraria/blob/main/proto/inventory.proto).
 
 #### Passo 1
 
@@ -166,11 +167,11 @@ message ProductResponse {
 
 #### Passo 3
 
-Agora você deve implementar a função `SearchProductByID` no arquivo [services/inventory/index.js](https://github.com/aserg-ufmg/micro-livraria/blob/main/services/inventory/index.js).
+Agora você deve implementar a função `SearchProductByID` no arquivo [services/inventory/index.js](https://github.com/hsborges/micro-livraria/blob/main/services/inventory/index.js).
 
 Reforçando, no passo anterior, apenas declaramos a assinatura dessa função. Então, agora, vamos prover uma implementação para ela.
 
-Para isso, você precisa implementar a função requerida pelo segundo parâmetro da função `server.addService`, localizada na linha 17 do arquivo [services/inventory/index.js](https://github.com/aserg-ufmg/micro-livraria/blob/main/services/inventory/index.js).
+Para isso, você precisa implementar a função requerida pelo segundo parâmetro da função `server.addService`, localizada na linha 17 do arquivo [services/inventory/index.js](https://github.com/hsborges/micro-livraria/blob/main/services/inventory/index.js).
 
 De forma semelhante à função `SearchAllProducts`, que já está implementada, você deve adicionar o corpo da função `SearchProductByID` com a lógica de pesquisa de produtos por ID. Este código deve ser adicionado logo após o `SearchAllProducts` na linha 23.
 
@@ -189,17 +190,17 @@ A função acima usa o método `find` para pesquisar em `products` pelo ID de pr
 
 -   `product` é uma unidade de produto a ser pesquisado pela função `find` (nativa de JavaScript). Essa pesquisa é feita em todos os items da lista de produtos até que um primeiro `product` atenda a condição de busca, isto é `product.id == payload.request.id`.
 
--   [products](https://github.com/aserg-ufmg/micro-livraria/blob/main/services/inventory/products.json) é um arquivo JSON que contém a descrição dos livros à venda na livraria.
+-   [products](https://github.com/hsborges/micro-livraria/blob/main/services/inventory/products.json) é um arquivo JSON que contém a descrição dos livros à venda na livraria.
 
 -   `callback` é uma função que deve ser invocada com dois parâmetros:
     -   O primeiro parâmetro é um objeto de erro, caso ocorra. No nosso exemplo nenhum erro será retornado, portanto `null`.
-    -   O segundo parâmetro é o resultado da função, no nosso caso um `ProductResponse`, assim como definido no arquivo [proto/inventory.proto](https://github.com/aserg-ufmg/micro-livraria/blob/main/proto/inventory.proto).
+    -   O segundo parâmetro é o resultado da função, no nosso caso um `ProductResponse`, assim como definido no arquivo [proto/inventory.proto](https://github.com/hsborges/micro-livraria/blob/main/proto/inventory.proto).
 
 #### Passo 4
 
 Para finalizar, temos que incluir a função `SearchProductByID` em nosso `Controller`. Para isso, você deve incluir uma nova rota `/product/{id}` que receberá o ID do produto como parâmetro. Na definição da rota, você deve também incluir a chamada para o método definido no Passo 3.
 
-Sendo mais específico, o seguinte trecho de código deve ser adicionado na linha 44 do arquivo [services/controller/index.js](https://github.com/aserg-ufmg/micro-livraria/blob/main/services/controller/index.js), logo após a rota `/shipping/:cep`.
+Sendo mais específico, o seguinte trecho de código deve ser adicionado na linha 44 do arquivo [services/controller/index.js](https://github.com/hsborges/micro-livraria/blob/main/services/controller/index.js), logo após a rota `/shipping/:cep`.
 
 ```js
 app.get('/product/:id', (req, res, next) => {
@@ -220,7 +221,7 @@ app.get('/product/:id', (req, res, next) => {
 });
 ```
 
-Finalize, efetuando uma chamada no novo endpoint da API: http://localhost:3000/product/1
+Finalize, efetuando uma chamada no novo endpoint da API: <http://localhost:3000/product/1>
 
 Para ficar claro: até aqui, apenas implementamos a nova operação no backend. A sua incorporação no frontend ficará pendente, pois requer mudar a interface Web, para, por exemplo, incluir um botão "Pesquisar Livro".
 
@@ -232,9 +233,194 @@ git commit -m "Tarefa prática #1 - Microservices"
 git push origin main
 ```
 
-## Tarefa Prática #2: Criando um Container Docker
+## Tarefa Prática #2: Implementando um Novo Serviço de Avaliações (Reviews)
 
-Nesta segunda tarefa, você irá criar um container Docker para o seu microserviço. Os containers são importantes para isolar e distribuir os microserviços em ambientes de produção. Em outras palavras, uma vez "copiado" para um container, um microsserviço pode ser executado em qualquer ambiente, seja ele sua máquina local, o servidor de sua universidade, ou um sistema de cloud (como Amazon AWS, Google Cloud, etc).
+Nesta segunda tarefa, você irá criar um novo microsserviço dedicado à funcionalidade de avaliações de livros. Esse serviço permitirá que os usuários adicionem comentários e notas aos livros da livraria, além de visualizar as avaliações de outros usuários.
+
+#### Passo 1
+
+Primeiro, vamos criar um arquivo `.proto` para definir as operações do novo serviço. Crie um arquivo `reviews.proto` no diretório `/proto` com o seguinte conteúdo:
+
+```proto
+syntax = "proto3";
+
+package reviews;
+
+service ReviewService {
+    rpc GetReviews(ProductId) returns (ReviewsResponse) {}
+    rpc AddReview(Review) returns (OperationResponse) {}
+}
+
+message ProductId {
+    int32 id = 1;
+}
+
+message Review {
+    int32 productId = 1;
+    string username = 2;
+    int32 rating = 3;
+    string comment = 4;
+    string date = 5;
+}
+
+message ReviewsResponse {
+    repeated Review reviews = 1;
+}
+
+message OperationResponse {
+    bool success = 1;
+    string message = 2;
+}
+```
+
+Este arquivo define duas operações principais:
+
+-   `GetReviews`: para recuperar todas as avaliações de um produto específico
+-   `AddReview`: para adicionar uma nova avaliação a um produto
+
+#### Passo 2
+
+Agora, vamos criar a estrutura do novo microsserviço. Crie um diretório `reviews` dentro de `/services` e adicione um arquivo `index.js` com o seguinte conteúdo:
+
+```js
+const path = require('path');
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
+
+// Carrega arquivo .proto
+const reviewsProtoPath = path.resolve(__dirname, '../../proto/reviews.proto');
+const reviewsProtoDefinition = protoLoader.loadSync(reviewsProtoPath);
+const reviewsPackageDefinition = grpc.loadPackageDefinition(reviewsProtoDefinition).reviews;
+
+// Array para armazenar as avaliações (em um sistema real, seria um banco de dados)
+const reviewsData = [];
+
+// Implementação do serviço
+const server = new grpc.Server();
+server.addService(reviewsPackageDefinition.ReviewService.service, {
+    // Retorna todas as avaliações de um produto
+    GetReviews: (call, callback) => {
+        const productId = call.request.id;
+        const productReviews = reviewsData.filter((review) => review.productId == productId);
+        callback(null, { reviews: productReviews });
+    },
+
+    // Adiciona uma nova avaliação
+    AddReview: (call, callback) => {
+        const review = call.request;
+
+        // Adiciona a data atual à avaliação
+        review.date = new Date().toISOString();
+
+        // Adiciona a avaliação ao array
+        reviewsData.push(review);
+
+        callback(null, {
+            success: true,
+            message: 'Avaliação adicionada com sucesso!',
+        });
+    },
+});
+
+// Inicia o servidor na porta 3003
+server.bindAsync('0.0.0.0:3003', grpc.ServerCredentials.createInsecure(), (error, port) => {
+    console.log('Reviews Service running at http://0.0.0.0:3003');
+    server.start();
+});
+```
+
+#### Passo 3
+
+Em seguida, precisamos atualizar o arquivo `controller/index.js` para adicionar as rotas que irão interagir com o novo serviço. Adicione o seguinte código no arquivo `services/controller/index.js`, após o bloco de importação dos outros serviços:
+
+```js
+// Carrega definição do serviço de reviews
+const reviewsProtoPath = path.resolve(__dirname, '../../proto/reviews.proto');
+const reviewsProtoDefinition = protoLoader.loadSync(reviewsProtoPath);
+const reviewsPackageDefinition = grpc.loadPackageDefinition(reviewsProtoDefinition).reviews;
+
+// Cria cliente para o serviço de reviews
+const reviews = new reviewsPackageDefinition.ReviewService('localhost:3003', grpc.credentials.createInsecure());
+```
+
+Após isso, adicione as seguintes rotas ao arquivo `services/controller/index.js`:
+
+```js
+// Rota para obter avaliações de um produto
+app.get('/reviews/:id', (req, res, next) => {
+    reviews.GetReviews({ id: req.params.id }, (err, reviewsData) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send({ error: 'Falha ao recuperar avaliações' });
+        } else {
+            res.json(reviewsData);
+        }
+    });
+});
+
+// Rota para adicionar uma nova avaliação
+app.post('/reviews', (req, res, next) => {
+    const review = {
+        productId: req.body.productId,
+        username: req.body.username,
+        rating: req.body.rating,
+        comment: req.body.comment,
+    };
+
+    reviews.AddReview(review, (err, response) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send({ error: 'Falha ao adicionar avaliação' });
+        } else {
+            res.json(response);
+        }
+    });
+});
+```
+
+#### Passo 4
+
+Agora, atualize o arquivo `package.json` para incluir o comando de inicialização do novo serviço. Adicione a seguinte linha ao objeto `scripts`:
+
+```json
+"start-reviews": "nodemon services/reviews/index.js",
+```
+
+E atualize o comando `start` para incluir o novo serviço:
+
+```json
+"start": "run-p start-frontend start-controller start-shipping start-inventory start-reviews",
+```
+
+#### Testando o Novo Serviço
+
+Para testar o serviço de avaliações, siga os passos abaixo:
+
+1. Inicie os serviços com o comando: `npm run start`
+
+2. Para visualizar as avaliações de um produto, acesse: `http://localhost:3000/reviews/1`
+
+3. Para adicionar uma nova avaliação, use o curl (ou uma ferramenta como Postman):
+
+```bash
+curl -X POST http://localhost:3000/reviews \
+  -H "Content-Type: application/json" \
+  -d '{"productId": 1, "username": "usuario", "rating": 5, "comment": "Ótimo livro!"}'
+```
+
+4. Verifique novamente as avaliações do produto para confirmar que a nova avaliação foi adicionada.
+
+**IMPORTANTE**: Se tudo funcionou corretamente, dê um **COMMIT & PUSH** (e certifique-se de que seu repositório no GitHub foi atualizado; isso é fundamental para seu trabalho ser devidamente corrigido).
+
+```bash
+git add --all
+git commit -m "Tarefa prática #2 - Serviço de Avaliações"
+git push origin main
+```
+
+## Tarefa Prática #3: Criando um Container Docker
+
+Nesta terceira tarefa, você irá criar um container Docker para o seu microserviço. Os containers são importantes para isolar e distribuir os microserviços em ambientes de produção. Em outras palavras, uma vez "copiado" para um container, um microsserviço pode ser executado em qualquer ambiente, seja ele sua máquina local, o servidor de sua universidade, ou um sistema de cloud (como Amazon AWS, Google Cloud, etc).
 
 Como nosso primeiro objetivo é didático, iremos criar apenas uma imagem Docker para exemplificar o uso de containers.
 
@@ -247,7 +433,7 @@ Crie um arquivo na raiz do projeto com o nome `shipping.Dockerfile`. Este arquiv
 Como ilustrado na próxima figura, o Dockerfile é utilizado para gerar uma imagem. A partir dessa imagem, você pode criar várias instâncias de uma aplicação. Com isso, conseguimos escalar o microsserviço de `Shipping` de forma horizontal.
 
 <p align="center">
-    <img width="70%" src="https://user-images.githubusercontent.com/7620947/108651385-67ccda80-74a0-11eb-9390-80df6ea6fd8c.png" />
+    <img width="70%" src=".github/images/docker-flow.png" />
 </p>
 
 No Dockerfile, você precisa incluir cinco instruções
@@ -295,7 +481,7 @@ O `./` no final indica que estamos executando os comandos do Dockerfile tendo co
 
 #### Passo 3
 
-Antes de iniciar o serviço via container Docker, precisamos remover a inicialização do serviço de Shipping do comando `npm run start`. Para isso, basta remover o sub-comando `start-shipping` localizado na linha 7 do arquivo [package.json](https://github.com/aserg-ufmg/micro-livraria/blob/main/package.json), conforme mostrado no próximo diff (a linha com o símbolo "-" no início representa a linha original do arquivo; a linha com o símbolo "+" representa como essa linha deve ficar após a sua alteração):
+Antes de iniciar o serviço via container Docker, precisamos remover a inicialização dos serviços de Shipping e Reviews do comando `npm run start`. Para isso, basta remover os sub-comandos `start-shipping` e `start-reviews` do arquivo [package.json](https://github.com/hsborges/micro-livraria/blob/main/package.json), conforme mostrado no próximo diff (as linhas com o símbolo "-" no início representam as linhas originais do arquivo; as linhas com o símbolo "+" representam como essas linhas devem ficar após a sua alteração):
 
 ```diff
 diff --git a/package.json b/package.json
@@ -306,7 +492,7 @@ index 25ff65c..552a04e 100644
      "description": "Toy example of microservice",
      "main": "",
      "scripts": {
--        "start": "run-p start-frontend start-controller start-shipping start-inventory",
+-        "start": "run-p start-frontend start-controller start-shipping start-inventory start-reviews",
 +        "start": "run-p start-frontend start-controller start-inventory",
          "start-controller": "nodemon services/controller/index.js",
          "start-shipping": "nodemon services/shipping/index.js",
@@ -344,7 +530,7 @@ E o Controller pode acessar o serviço diretamente através do container Docker.
 
 ```bash
 git add --all
-git commit -m "Tarefa prática #2 - Docker"
+git commit -m "Tarefa prática #3 - Docker"
 git push origin main
 ```
 
@@ -361,7 +547,6 @@ onde:
 -   `docker stop`: comando para interromper a execução de um container.
 -   `shipping`: nome do container que será interrompido.
 
-
 ```
 docker rm shipping
 ```
@@ -370,7 +555,6 @@ onde:
 
 -   `docker rm`: comando para remover um container.
 -   `shipping`: nome do container que será removido.
-
 
 ```
 docker rmi micro-livraria/shipping

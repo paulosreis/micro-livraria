@@ -17,14 +17,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/aserg-ufmg/micro-livraria.git"
+        "url": "git+https://github.com/hsborges/micro-livraria.git"
     },
     "author": "Rodrigo",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/aserg-ufmg/micro-livraria/issues"
+        "url": "https://github.com/hsborges/micro-livraria/issues"
     },
-    "homepage": "https://github.com/aserg-ufmg/micro-livraria#readme",
+    "homepage": "https://github.com/hsborges/micro-livraria#readme",
     "dependencies": {
         "@grpc/grpc-js": "^1.13.4",
         "@grpc/proto-loader": "^0.7.15",

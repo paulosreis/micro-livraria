@@ -72,3 +72,44 @@ body {
         min-height: 250px;
     }
 }
+
+/* Review styles */
+.reviews-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.review-item {
+    margin-bottom: 15px;
+    padding: 10px;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.stars {
+    color: gold;
+    margin: 0 10px;
+}
+
+.date {
+    color: #888;
+}
+
+.mt-3 {
+    margin-top: 15px;
+}
+
+.ml-1 {
+    margin-left: 5px;
+}
+
+/* Make sure modal content works well */
+.swal-content {
+    max-height: 70vh;
+    overflow-y: auto;
+}
