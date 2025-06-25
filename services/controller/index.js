@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 /**
  * Retorna a lista de produtos da loja via InventoryService
