@@ -4,7 +4,7 @@
     "description": "Toy example of microservice",
     "main": "",
     "scripts": {
-        "start": "run-p start-proxy start-frontend start-controller start-shipping start-inventory",
+        "start": "run-p start-proxy start-frontend start-controller start-shipping start-inventory start-review",
         "start-controller": "nodemon services/controller/index.js",
         "start-shipping": "nodemon services/shipping/index.js",
         "start-inventory": "nodemon services/inventory/index.js",
@@ -13,7 +13,8 @@
         "exec": "run-p start-proxy start-frontend exec-controller exec-shipping exec-inventory",
         "exec-controller": "node services/controller/index.js",
         "exec-shipping": "node services/shipping/index.js",
-        "exec-inventory": "node services/inventory/index.js"
+        "exec-inventory": "node services/inventory/index.js",
+        "start-review": "nodemon services/review/index.js"
     },
     "repository": {
         "type": "git",
