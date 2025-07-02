@@ -115,6 +115,22 @@ curl -i -X GET http://localhost:3000/products
 
 7. Teste agora o sistema como um todo, abrindo o front-end em um navegador: <http://localhost:5000>. Faça então um teste das principais funcionalidades da livraria.
 
+## Acesso à Aplicação
+
+> **Atenção:**  
+> Embora o frontend seja servido na porta 5000 (`http://localhost:5000`), para que toda a aplicação funcione corretamente (frontend + backend), **você deve acessar pelo endereço `http://localhost:8080`**.
+
+A porta 8080 utiliza um proxy que encaminha as requisições `/api` para o backend (controller) e o restante para o frontend.  
+Se acessar diretamente pela porta 5000, apenas a interface será exibida, mas as funcionalidades que dependem do backend (como listar produtos, calcular frete, avaliações, etc.) **não funcionarão**.
+
+Portanto, após rodar `npm run start`, acesse sempre:
+
+```
+http://localhost:8080
+```
+
+para utilizar todas as funcionalidades da micro-livraria.
+
 ## Tarefa Prática #1: Implementando uma Nova Operação
 
 Nesta primeira tarefa, você irá implementar uma nova operação no serviço `Inventory`. Essa operação, chamada `SearchProductByID` vai pesquisar por um produto, dado o seu ID.
